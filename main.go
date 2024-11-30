@@ -6,11 +6,13 @@ import (
 	"github.com/go-rod/rod"
 )
 
+var endpoint string = "https://login.account.rakuten.com/sso/authorize?client_id=rakuten_card_enavi_web&redirect_uri=https://www.rakuten-card.co.jp/e-navi/auth/login.xhtml&scope=openid%20profile&response_type=code&prompt=login#/sign_in"
+
 func main() {
 	// Login to Rakuten Card
 	browser := rod.New().MustConnect()
 	defer browser.MustClose()
-	RakutenPage := browser.MustPage("https://login.account.rakuten.com/sso/authorize?client_id=rakuten_card_enavi_web&redirect_uri=https://www.rakuten-card.co.jp/e-navi/auth/login.xhtml&scope=openid%20profile&response_type=code&prompt=login#/sign_in").MustWaitStable()
+	RakutenPage := browser.MustPage(endpoint).MustWaitStable()
 	fmt.Println("Login Page loaded, Inputing User ID")
 	RakutenPage.MustElement("input[id='user_id']").MustInput("dehaanchillax13")
 
