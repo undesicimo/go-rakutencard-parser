@@ -30,6 +30,7 @@ func main() {
 	amount, e := RakutenPage.MustWaitStable().MustElementX("//*[@id='js-rd-billInfo-amount_show']/span").Text()
 	if e != nil {
 		fmt.Println(e)
+		panic(e)
 	}
 	fmt.Println(amount)
 }
