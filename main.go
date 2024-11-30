@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/go-rod/rod"
+	"github.com/resend/resend-go/v2"
 )
 
 var endpoint string = "https://login.account.rakuten.com/sso/authorize?client_id=rakuten_card_enavi_web&redirect_uri=https://www.rakuten-card.co.jp/e-navi/auth/login.xhtml&scope=openid%20profile&response_type=code&prompt=login#/sign_in"
@@ -33,4 +34,10 @@ func main() {
 		panic(e)
 	}
 	fmt.Println(amount)
+	SendEmail(amount)
+}
+
+func SendEmail(amount string) {
+	apiKey := "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+	resend.NewClient(apiKey)
 }

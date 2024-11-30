@@ -5,6 +5,7 @@ go 1.23.3
 require github.com/go-rod/rod v0.116.2
 
 require (
+	github.com/resend/resend-go/v2 v2.13.0 // indirect
 	github.com/ysmood/fetchup v0.2.3 // indirect
 	github.com/ysmood/goob v0.4.0 // indirect
 	github.com/ysmood/got v0.40.0 // indirect
