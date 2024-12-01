@@ -64,10 +64,9 @@ func SendEmail(amount string) {
 		Html:    html,
 	}
 	log.Println("Sending email...")
-	sent, err := client.Emails.Send(params)
+	_, err := client.Emails.Send(params)
 	if err != nil {
 		log.Fatal(err)
 	}
 	log.Println("Email sent")
-	log.Println(sent)
 }
