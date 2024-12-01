@@ -2,42 +2,72 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"os"
 
 	"github.com/go-rod/rod"
+	"github.com/joho/godotenv"
 	"github.com/resend/resend-go/v2"
 )
 
-var endpoint string = "https://login.account.rakuten.com/sso/authorize?client_id=rakuten_card_enavi_web&redirect_uri=https://www.rakuten-card.co.jp/e-navi/auth/login.xhtml&scope=openid%20profile&response_type=code&prompt=login#/sign_in"
-
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+	ENDPOINT := os.Getenv("RAKUTEN_ENDPOINT")
+	USERNAME := os.Getenv("RAKUTEN_USERNAME")
+	PASSWORD := os.Getenv("RAKUTEN_PASSWORD")
+
 	// Login to Rakuten Card
 	browser := rod.New().MustConnect()
 	defer browser.MustClose()
-	RakutenPage := browser.MustPage(endpoint).MustWaitStable()
-	fmt.Println("Login Page loaded, Inputing User ID")
-	RakutenPage.MustElement("input[id='user_id']").MustInput("dehaanchillax13")
+	RakutenPage := browser.MustPage(ENDPOINT).MustWaitStable()
+	log.Println("Login Page loaded, Inputing User ID")
+	RakutenPage.MustElement("input[id='user_id']").MustInput(USERNAME)
 
-	fmt.Println("going next")
+	log.Println("Inputting Password")
 	RakutenPage.MustElementX("//*[@id='cta001']").MustClick()
-	fmt.Println("Password Inputted, going next")
-	RakutenPage.MustElement("input[id='password_current']").MustInput("Vongola26//")
-	fmt.Println("Inputting password again")
+	RakutenPage.MustElement("input[id='password_current']").MustInput(PASSWORD)
 	RakutenPage.MustElementX("//*[@id='cta011']").MustClick()
-	RakutenPage.MustWaitStable().MustElement("input[id='password_current']").MustInput("Vongola26//")
+
+	// We get redirected again to the login page
+	RakutenPage.MustWaitStable().MustElement("input[id='password_current']").MustInput(PASSWORD)
 	RakutenPage.MustElementX("//*[@id='cta011']").MustClick()
-	fmt.Println("Logged in")
+	log.Println("Logged in")
+
+	// Get amount information
 	RakutenPage.MustWaitStable().MustElement("select[id='cardChangeForm:cardtype']").MustSelect("楽天カード（Visa）")
-	fmt.Println("Getting the amount")
+	log.Println("Getting the amount")
 	amount, e := RakutenPage.MustWaitStable().MustElementX("//*[@id='js-rd-billInfo-amount_show']/span").Text()
 	if e != nil {
-		fmt.Println(e)
+		log.Println(e)
 		panic(e)
 	}
-	fmt.Println(amount)
+
 	SendEmail(amount)
 }
 
 func SendEmail(amount string) {
-	apiKey := "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-	resend.NewClient(apiKey)
+	RESEND_API_KEY := os.Getenv("RESEND_API_KEY")
+	EMAIL_RECIPIENT := os.Getenv("EMAIL_RECIPIENT")
+	EMAIL_RECIPIENT_2 := os.Getenv("EMAIL_RECIPIENT_2")
+	EMAIL_ORIGIN := os.Getenv("EMAIL_ORIGIN")
+
+	client := resend.NewClient(RESEND_API_KEY)
+	html := fmt.Sprintf("<b>¥%s</b>", amount)
+
+	params := &resend.SendEmailRequest{
+		From:    EMAIL_ORIGIN,
+		To:      []string{EMAIL_RECIPIENT, EMAIL_RECIPIENT_2},
+		Subject: "今のところ、これぐらい使ってるよ",
+		Html:    html,
+	}
+	log.Println("Sending email...")
+	sent, err := client.Emails.Send(params)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println("Email sent")
+	log.Println(sent)
 }
