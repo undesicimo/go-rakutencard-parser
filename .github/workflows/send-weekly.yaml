@@ -2,7 +2,7 @@ name: Send Weekly Report
 
 on:
   schedule:
-    - cron: '0 10 * * 5' # Runs at 10:00 UTC every Friday (7 PM JST)
+    - cron: "0 10 * * 5" # Runs at 10:00 UTC every Friday (7 PM JST)
   workflow_dispatch:
 
 jobs:
@@ -10,24 +10,35 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Set up Go
-      uses: actions/setup-go@v5
-      with:
-        go-version: '1.23.3'
+      - name: Make envfile
+        uses: SpicyPizza/create-envfile@v2.0
+        with:
+          envkey_RAKUTEN_ENDPOINT: ${{ secrets.RAKUTEN_ENDPOINT }}
+          envkey_RAKUTEN_USERNAME: ${{ secrets.RAKUTEN_USERNAME }}
+          envkey_RAKUTEN_PASSWORD: ${{ secrets.RAKUTEN_PASSWORD }}
+          envkey_RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          envkey_EMAIL_RECIPIENT: ${{ secrets.EMAIL_RECIPIENT }}
+          envkey_EMAIL_RECIPIENT_2: ${{ secrets.EMAIL_RECIPIENT_2 }}
+          envkey_EMAIL_ORIGIN: ${{ secrets.EMAIL_ORIGIN }}
 
-    - name: Install dependencies
-      run: go mod download
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.23.3"
 
-    - name: Run the Go project
-      env:
-        RAKUTEN_ENDPOINT: ${{ secrets.RAKUTEN_ENDPOINT }}
-        RAKUTEN_USERNAME: ${{ secrets.RAKUTEN_USERNAME }}
-        RAKUTEN_PASSWORD: ${{ secrets.RAKUTEN_PASSWORD }}
-        RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
-        EMAIL_RECIPIENT: ${{ secrets.EMAIL_RECIPIENT }}
-        EMAIL_RECIPIENT_2: ${{ secrets.EMAIL_RECIPIENT_2 }}
-        EMAIL_ORIGIN: ${{ secrets.EMAIL_ORIGIN }}
-      run: go run main.go
+      - name: Install dependencies
+        run: go mod download
+
+      - name: Run the Go project
+        env:
+          RAKUTEN_ENDPOINT: ${{ secrets.RAKUTEN_ENDPOINT }}
+          RAKUTEN_USERNAME: ${{ secrets.RAKUTEN_USERNAME }}
+          RAKUTEN_PASSWORD: ${{ secrets.RAKUTEN_PASSWORD }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          EMAIL_RECIPIENT: ${{ secrets.EMAIL_RECIPIENT }}
+          EMAIL_RECIPIENT_2: ${{ secrets.EMAIL_RECIPIENT_2 }}
+          EMAIL_ORIGIN: ${{ secrets.EMAIL_ORIGIN }}
+        run: go run main.go
